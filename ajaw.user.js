@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         Ajaw
 // @namespace    Reeyz
-// @version      0.1.0
+// @version      0.1.1
 // @description  A Wplace utility tool
 // @author       Reeyz
-// @updateURL    
-// @downloadURL  
+// @updateURL    https://github.com/Reeyz/Wplace-Ajaw/raw/main/ajaw.user.js
+// @downloadURL  https://github.com/Reeyz/Wplace-Ajaw/raw/main/ajaw.user.js
 // @match        https://wplace.live/*
 // @icon         
 // @grant        unsafeWindow
