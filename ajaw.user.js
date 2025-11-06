@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Ajaw
 // @namespace    Reeyz
-// @version      0.1.3
+// @version      0.1.4
 // @description  A Wplace utility tool
 // @author       Reeyz
 // @updateURL    https://github.com/Reeyz/Wplace-Ajaw/raw/main/ajaw.user.js
@@ -195,10 +195,6 @@
             localStorage.setItem('wpp_button_pos', JSON.stringify(this.state.buttonPos));
         },
 
-        easeInOutQuad(t) {
-            return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-        },
-
         animateDrag() {
             if (!this.state.isDragging) return;
 
@@ -207,23 +203,9 @@
 
             const ds = this.state.dragState;
 
-            // Smooth easing for gentle acceleration/deceleration
-            const dx = ds.targetX - ds.currentX;
-            const dy = ds.targetY - ds.currentY;
-            const distance = Math.hypot(dx, dy);
-
-            if (distance > 0.5) {
-                // Use easing for smooth motion
-                const easeAmount = Math.min(this.config.dragSmoothness, distance / 100);
-                const easedAmount = this.easeInOutQuad(easeAmount);
-
-                ds.currentX += dx * easedAmount;
-                ds.currentY += dy * easedAmount;
-            } else {
-                // Snap to target when very close
-                ds.currentX = ds.targetX;
-                ds.currentY = ds.targetY;
-            }
+            // Direct follow - instant response, no deceleration
+            ds.currentX = ds.targetX;
+            ds.currentY = ds.targetY;
 
             const rect = container.getBoundingClientRect();
             const buttonWidth = rect.width;
@@ -350,15 +332,15 @@
             document.addEventListener('touchend', (e) => {
                 const wasTap = !this.state.touchMoved && !this.state.isDragging;
                 
-                // Check if tap was inside the menu content
-                const menuContent = document.getElementById('wpp-menu-content');
-                const tappedInsideMenu = menuContent && e.target && menuContent.contains(e.target);
+                // Check if the button was specifically tapped
+                const button = document.getElementById('wpp-button');
+                const tappedButton = button && e.target && (e.target === button || button.contains(e.target));
                 
                 endDrag();
                 touchIdentifier = null;
                 
-                // Only toggle menu if it was a tap AND not inside menu
-                if (wasTap && !tappedInsideMenu) {
+                // Only toggle menu if button was tapped
+                if (wasTap && tappedButton) {
                     this.toggleMenu();
                 }
                 
@@ -546,6 +528,11 @@
                     cursor: pointer;
                     font-family: inherit;
                     transition: all 0.2s ease;
+                }
+
+                .wpp-menu-section select option {
+                    color: var(--wpp-menu-text);
+                    background: var(--wpp-menu-bg);
                 }
 
                 .wpp-menu-section select:hover {
