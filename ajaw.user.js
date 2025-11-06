@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Ajaw
 // @namespace    Reeyz
-// @version      0.1.1
+// @version      0.1.2
 // @description  A Wplace utility tool
 // @author       Reeyz
 // @updateURL    https://github.com/Reeyz/Wplace-Ajaw/raw/main/ajaw.user.js
@@ -39,7 +39,8 @@
                 targetX: 0,
                 targetY: 0,
                 rafId: null
-            }
+            },
+            touchMoved: false
         },
 
         themesMap: {
@@ -235,9 +236,7 @@
             container.style.bottom = `${Math.max(0, Math.min(bottom, window.innerHeight - buttonHeight))}px`;
 
             ds.rafId = requestAnimationFrame(() => this.animateDrag());
-        },
-
-        setupDraggable() {
+        },        setupDraggable() {
             const button = document.getElementById('wpp-button');
             const container = document.getElementById('wpp-button-container');
             if (!button || !container) return;
@@ -310,6 +309,7 @@
                 }
             };
 
+            // Mouse events
             button.addEventListener('mousedown', (e) => {
                 e.preventDefault();
                 startLongPress();
@@ -326,14 +326,17 @@
                 endDrag();
             });
 
+            // Touch events - FIXED for mobile
             button.addEventListener('touchstart', (e) => {
-                e.preventDefault();
                 const touch = e.touches[0];
                 touchIdentifier = touch.identifier;
+                this.state.touchMoved = false;
                 startLongPress();
-            }, { passive: false });
+            }, { passive: true });
 
             document.addEventListener('touchmove', (e) => {
+                this.state.touchMoved = true;
+                
                 if (this.state.isDragging) {
                     e.preventDefault();
                     const touch = Array.from(e.touches).find(t => t.identifier === touchIdentifier);
@@ -343,16 +346,27 @@
                 }
             }, { passive: false });
 
-            document.addEventListener('touchend', () => {
+            document.addEventListener('touchend', (e) => {
+                const wasTap = !this.state.touchMoved && !this.state.isDragging;
+                
                 endDrag();
                 touchIdentifier = null;
+                
+                // If it was a tap (no movement, no drag), open the menu
+                if (wasTap) {
+                    this.toggleMenu();
+                }
+                
+                this.state.touchMoved = false;
             });
 
             document.addEventListener('touchcancel', () => {
                 endDrag();
                 touchIdentifier = null;
+                this.state.touchMoved = false;
             });
 
+            // Click event for mouse (desktop)
             button.addEventListener('click', (e) => {
                 if (!this.state.isDragging && !this.state.isLongPressing) {
                     this.toggleMenu();
@@ -540,8 +554,7 @@
                     box-shadow: 0 0 0 3px rgba(0, 105, 255, 0.1);
                     background: rgba(0, 0, 0, 0.05);
                 }
-
-                .wpp-slider-container {
+                                .wpp-slider-container {
                     display: flex;
                     align-items: center;
                     gap: 12px;
