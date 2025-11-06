@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Ajaw
 // @namespace    Reeyz
-// @version      0.1.2
+// @version      0.1.3
 // @description  A Wplace utility tool
 // @author       Reeyz
 // @updateURL    https://github.com/Reeyz/Wplace-Ajaw/raw/main/ajaw.user.js
@@ -236,7 +236,8 @@
             container.style.bottom = `${Math.max(0, Math.min(bottom, window.innerHeight - buttonHeight))}px`;
 
             ds.rafId = requestAnimationFrame(() => this.animateDrag());
-        },        setupDraggable() {
+        },
+                setupDraggable() {
             const button = document.getElementById('wpp-button');
             const container = document.getElementById('wpp-button-container');
             if (!button || !container) return;
@@ -349,11 +350,15 @@
             document.addEventListener('touchend', (e) => {
                 const wasTap = !this.state.touchMoved && !this.state.isDragging;
                 
+                // Check if tap was inside the menu content
+                const menuContent = document.getElementById('wpp-menu-content');
+                const tappedInsideMenu = menuContent && e.target && menuContent.contains(e.target);
+                
                 endDrag();
                 touchIdentifier = null;
                 
-                // If it was a tap (no movement, no drag), open the menu
-                if (wasTap) {
+                // Only toggle menu if it was a tap AND not inside menu
+                if (wasTap && !tappedInsideMenu) {
                     this.toggleMenu();
                 }
                 
